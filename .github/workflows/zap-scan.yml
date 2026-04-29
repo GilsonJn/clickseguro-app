@@ -1,0 +1,33 @@
+name: ZAP Security Scan
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  zap_scan:
+    runs-on: ubuntu-latest
+    name: Scan de Vulnerabilidades (OWASP ZAP)
+    steps:
+      - name: 1. Baixar o código do repositório
+        uses: actions/checkout@v4
+
+      - name: 2. Configurar o ambiente Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 3. Instalar dependências e subir a aplicação
+        run: |
+          npm install express
+          # Inicia a aplicação em background (&)
+          node server.js &
+          # Espera 10 segundos para garantir que o servidor subiu
+          sleep 10
+
+      - name: 4. Executar OWASP ZAP CLI (Requisitos 1, 2 e 5)
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: 'http://localhost:8080'
+          # Essa regra (fail_action) faz o pipeline falhar se achar erros de segurança (Requisito 2)
+          fail_action: true
