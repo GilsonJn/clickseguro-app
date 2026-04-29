@@ -29,11 +29,14 @@ jobs:
         uses: zaproxy/action-baseline@v0.12.0
         with:
           target: 'http://localhost:8080'
+          # AQUI ESTÁ A CORREÇÃO: Diz para o ZAP gerar o HTML
+          cmd_options: '-r zap-report.html'
           fail_action: true 
 
       - name: 5. Salvar Relatório ZAP como Artefato (Requisito 5)
-        if: always() # Garante que o relatório seja salvo mesmo com o pipeline falhando
+        if: always() 
         uses: actions/upload-artifact@v4
         with:
           name: zap-security-report
-          path: report_html.html
+          # Caminho com o mesmo nome que definimos no passo 4
+          path: zap-report.html
