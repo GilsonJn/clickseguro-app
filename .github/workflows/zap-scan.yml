@@ -26,17 +26,15 @@ jobs:
           sleep 10
 
       - name: 4. Executar OWASP ZAP CLI (Requisitos 1 e 2)
-        uses: zaproxy/action-baseline@v0.12.0
-        with:
-          target: 'http://localhost:8080'
-          # AQUI ESTÁ A CORREÇÃO: Diz para o ZAP gerar o HTML
-          cmd_options: '-r zap-report.html'
-          fail_action: true 
+        run: |
+          # Dá permissão para a ferramenta conseguir salvar o arquivo na pasta
+          chmod 777 .
+          # Roda o ZAP direto via Docker obrigando-o a enxergar a rede local
+          docker run --network host -v $(pwd):/zap/wrk/:rw -t ghcr.io/zaproxy/zaproxy:stable zap-baseline.py -t http://localhost:8080 -r zap-report.html -l FAIL
 
       - name: 5. Salvar Relatório ZAP como Artefato (Requisito 5)
-        if: always() 
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: zap-security-report
-          # Caminho com o mesmo nome que definimos no passo 4
           path: zap-report.html
